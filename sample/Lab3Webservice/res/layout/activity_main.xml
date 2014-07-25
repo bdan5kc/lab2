@@ -1,0 +1,108 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btncreate"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/editText2"
+        android:text="Column Families" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editText3"
+        android:layout_alignBottom="@+id/editText3"
+        android:layout_alignRight="@+id/txttable"
+        android:text="Table Name" />
+
+    <EditText
+        android:id="@+id/editText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/editText1"
+        android:layout_marginTop="15dp"
+        android:ems="10"
+        tools:ignore="TextFields" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="40dp"
+        android:layout_toRightOf="@+id/textView2"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/btndelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/btnretrieve"
+        android:layout_alignBottom="@+id/btnretrieve"
+        android:layout_alignRight="@+id/btninsert"
+        android:text="Delete" />
+
+    <TextView
+        android:id="@+id/txttitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="CRUD Operations on HBase"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/btninsert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/btncreate"
+        android:layout_alignBottom="@+id/btncreate"
+        android:layout_alignRight="@+id/txttitle"
+        android:text="@string/insert" />
+
+    <Button
+        android:id="@+id/btncreate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText2"
+        android:layout_marginTop="38dp"
+        android:layout_toRightOf="@+id/textView2"
+        android:text="@string/create" />
+
+    <TextView
+        android:id="@+id/txttable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/editText2"
+        android:layout_alignParentLeft="true"
+        android:text="Table Name" />
+
+    <EditText
+        android:id="@+id/editText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btninsert"
+        android:layout_marginTop="25dp"
+        android:layout_toRightOf="@+id/textView2"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/btnretrieve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText3"
+        android:layout_marginTop="19dp"
+        android:layout_toRightOf="@+id/textView2"
+        android:text="Retrieve" />
+
+</RelativeLayout>

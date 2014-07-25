@@ -1,6 +1,17 @@
 package com.example.sample;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+
+import com.google.android.maps.GeoPoint;
 
 import android.app.IntentService;
 import android.app.ProgressDialog;
@@ -12,7 +23,16 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Criteria;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.TextView;
@@ -22,9 +42,14 @@ import android.widget.Toast;
 public class ConnectionService extends IntentService implements BluetoothAdapter.LeScanCallback{
 //variables declaration
 	
+	private LocationManager locationManager;
+    private LocationListener locationListener;
+	
 	private static final String TAG = "BluetoothGattActivity";
 
     private static final String DEVICE_NAME = "SensorTag";
+    
+    String humidity;
 
     /* Humidity Service */
     private static final UUID HUMIDITY_SERVICE = UUID.fromString("f000aa20-0451-4000-b000-000000000000");
@@ -159,13 +184,13 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
                     characteristic = gatt.getService(PRESSURE_SERVICE)
                             .getCharacteristic(PRESSURE_CONFIG_CHAR);
                     characteristic.setValue(new byte[] {0x01});
-                    break;
-                case 2:
+                    break;*/
+                case 3:
                     Log.d(TAG, "Enabling humidity");
                     characteristic = gatt.getService(HUMIDITY_SERVICE)
                             .getCharacteristic(HUMIDITY_CONFIG_CHAR);
                     characteristic.setValue(new byte[] {0x01});
-                    break;*/
+                    break;
                 case 0:
                     Log.d(TAG,"Enabling accelerometer");
                     characteristic= gatt.getService(ACCELEROMETER_SERVICE)
@@ -217,12 +242,12 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
                     Log.d(TAG, "Reading pressure");
                     characteristic = gatt.getService(PRESSURE_SERVICE)
                             .getCharacteristic(PRESSURE_DATA_CHAR);
-                    break;
+                    break;*/
                 case 2:
                     Log.d(TAG, "Reading humidity");
                     characteristic = gatt.getService(HUMIDITY_SERVICE)
                             .getCharacteristic(HUMIDITY_DATA_CHAR);
-                    break;*/
+                    break;
                 case 0:
                     Log.d(TAG,"Reading accelerometer");
                     characteristic = gatt.getService(ACCELEROMETER_SERVICE)
@@ -267,12 +292,12 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
                    Log.d(TAG, "Set notify pressure");
                    characteristic = gatt.getService(PRESSURE_SERVICE)
                            .getCharacteristic(PRESSURE_DATA_CHAR);
-                   break;
+                   break;*/
                case 2:
                    Log.d(TAG, "Set notify humidity");
                    characteristic = gatt.getService(HUMIDITY_SERVICE)
                            .getCharacteristic(HUMIDITY_DATA_CHAR);
-                   break;*/
+                   break;
                case 0:
                    Log.d(TAG,"Set notify accelerometer");
                    characteristic = gatt.getService(ACCELEROMETER_SERVICE)
@@ -359,10 +384,10 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
                //mHandler.sendMessage(Message.obtain(null, MSG_GYROSCOPE, characteristic));
         	   Log.i("sensor", "gyroscope");
            }
-           /*if (HUMIDITY_DATA_CHAR.equals(characteristic.getUuid())) {
-               mHandler.sendMessage(Message.obtain(null, MSG_HUMIDITY, characteristic));
+           if (HUMIDITY_DATA_CHAR.equals(characteristic.getUuid())) {
+               Log.i("sensor","humidity");
            }
-           if (PRESSURE_DATA_CHAR.equals(characteristic.getUuid())) {
+           /*if (PRESSURE_DATA_CHAR.equals(characteristic.getUuid())) {
                mHandler.sendMessage(Message.obtain(null, MSG_PRESSURE, characteristic));
            }
            if (PRESSURE_CAL_CHAR.equals(characteristic.getUuid())) {
@@ -387,10 +412,11 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
             * value changes will be posted here.  Similar to read, we hand these up to the
             * UI thread to update the display.
             */
-        /*   if (HUMIDITY_DATA_CHAR.equals(characteristic.getUuid())) {
-               mHandler.sendMessage(Message.obtain(null, MSG_HUMIDITY, characteristic));
+           if (HUMIDITY_DATA_CHAR.equals(characteristic.getUuid())) {
+               //mHandler.sendMessage(Message.obtain(null, MSG_HUMIDITY, characteristic));
+        	   updateHumidity(characteristic);
            }
-           if (PRESSURE_DATA_CHAR.equals(characteristic.getUuid())) {
+         /*  if (PRESSURE_DATA_CHAR.equals(characteristic.getUuid())) {
                mHandler.sendMessage(Message.obtain(null, MSG_PRESSURE, characteristic));
            }
            if (PRESSURE_CAL_CHAR.equals(characteristic.getUuid())) {
@@ -446,14 +472,75 @@ public class ConnectionService extends IntentService implements BluetoothAdapter
 		
 		//Log.i(TAG,gyroData);
    }
- 
+   
+   public void updateHumidity(BluetoothGattCharacteristic characteristic)
+   {
+	   double humidity1 = SensorTagData.extractHumidity(characteristic);
+	   humidity = Double.toString(humidity1);
+	   Log.i("Humidity",humidity);
+	   
+   }
    private void updateAccelerometerCals(BluetoothGattCharacteristic characteristic) {
        //if (mPressureCals == null) return;
        //double pressure = SensorTagData.extractBarometer(characteristic, mPressureCals);
        Float[] values = SensorTagData.extractAccelerometerReading(characteristic, 0);
-       Log.i("values", "x :"+values[0].toString());
+          
+       Log.i("values", "x :"+values[0].toString() + "y:"+values[1].toString()+"z:"+values[2].toString());
        
-      
+       
+       LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+       Criteria criteria = new Criteria();
+       String provider = locationManager.getBestProvider(criteria, true);
+       Location location = locationManager.getLastKnownLocation(provider);
+       double latitude = location.getLatitude();
+       double longitude = location.getLongitude();
+     
+       
+       Log.i("location: ","Latitude: " + latitude + 
+               " Longitude: " + longitude);
+       
+       
+         
+       Date d = new Date();
+
+       String filename = "sensorData";
+       String string = "\n"+latitude+"\t"+longitude+"\t"+d.toString() + "\t" + 
+       String.valueOf(values[0]) + "\t" + String.valueOf(values[1]) +"\t" + 
+       String.valueOf(values[2])+ "\t"+humidity;
+       
+ 
+       SaveData(string);
+
    }
-	
+   
+   
+   private void SaveData(String string) {
+      // Log.i("string", string);
+        File sdCard = Environment.getExternalStorageDirectory();
+        File directory = new File (sdCard.getAbsolutePath() + "/Data");
+        if(!directory.exists())
+        directory.mkdirs();
+        String fname = "sensor_kumar.txt";
+        File file = new File (directory, fname);
+        
+        try {
+            if(!file.exists())
+                file.createNewFile();
+               FileOutputStream out = new FileOutputStream(file,true);
+               out.write(string.getBytes());
+               out.flush();
+               out.close();
+
+        } catch (Exception e) {
+               e.printStackTrace();
+        }
+    }
+   
+   
+   
+  
 }
+
+
+
+
